@@ -1,0 +1,88 @@
+\documentclass{beamer}
+
+\usepackage{fontspec}
+\usepackage{xcolor}
+
+\usefonttheme{serif}
+\setmainfont{Charter}
+
+
+\definecolor{primary}{RGB}{87,130,217}
+\definecolor{secondary}{RGB}{99,179,46}
+
+\setbeamercolor{title}{fg=primary}
+\setbeamercolor{frametitle}{fg=primary}
+\setbeamercolor{itemize item}{fg=primary}
+
+\setbeamercolor{block title example}{fg=secondary}
+\setbeamercolor{author}{fg=secondary}
+\setbeamercolor{date}{fg=secondary}
+
+\newcommand{\code}[1]{{\color{secondary} \texttt{#1}}}
+
+\title{Clojure SPAs with re-frame}
+\author{Artem Chernyak}
+\date{2020}
+
+\begin{document}
+
+  \frame{\titlepage}
+
+  \begin{frame}
+    \frametitle{Groundwork}
+    \begin{itemize}
+      \item ClojureScript
+      \item Hiccup
+      \item React
+      \item Reagent
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{ClojureScript}
+    \begin{itemize}
+      \item Mostly Clojure
+      \item Runs on node
+      \item Runs in browser
+      \item Reagent
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Hiccup for HTML}
+    \begin{verbatim}
+[:html
+  [:h1 "Hello World"]
+    \end{verbatim}
+    \begin{itemize}
+      \item Supports basic html tags
+      \item Auto closing tags
+      \item Lisp syntax
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Clojure in Hiccup}
+    \begin{verbatim}
+[:ul
+  (for [i (range 1 4)]
+    [:li i])]
+    \end{verbatim}
+    \begin{itemize}
+      \item Supports basic html tags
+      \item Auto closing tags
+      \item Lisp syntax
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{React}
+    \begin{itemize}
+      \item JavaScript framework
+      \item Component based
+      \item Highly reusable abstractions
+      \item Great performance
+    \end{itemize}
+  \end{frame}
+
+\end{document}

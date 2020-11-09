@@ -1,0 +1,12 @@
+.DS_Store
+.idea
+*.log
+tmp/
+
+*.aux
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+.auctex-auto/
