@@ -52,7 +52,25 @@
     \frametitle{Hiccup for HTML}
     \begin{verbatim}
 [:html
-  [:h1 "Hello World"]
+  [:h1 "Hello World"]]
+    \end{verbatim}
+    \begin{itemize}
+      \item Supports basic html tags
+      \item Auto closing tags
+      \item Lisp syntax
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Properties in Hiccup}
+    \begin{verbatim}
+[:html
+  [:h1
+    {:class "title"}
+    "Hello World"]]
+
+[:html
+  [:h1.title "Hello World"]]
     \end{verbatim}
     \begin{itemize}
       \item Supports basic html tags
@@ -82,6 +100,227 @@
       \item Component based
       \item Highly reusable abstractions
       \item Great performance
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Clojure in Hiccup}
+    \begin{verbatim}
+(defn hello [name]
+  [:h1  "Hello " name])
+
+[:html
+  [hello "World" ]]
+    \end{verbatim}
+    \begin{itemize}
+      \item Use Hiccup
+      \item Allows modularizing with components
+      \item Work just like function
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{State management}
+    \begin{verbatim}
+(defn click-count (r/atom 0))
+
+(defn counting-component []
+  [:div
+   "The atom " [:code "click-count"] " has value: "
+   @click-count ". "
+   [:input {:type "button" :value "Click me!"
+            :on-click #(swap! click-count inc)}]])
+    \end{verbatim}
+    \begin{itemize}
+      \item Uses clojure atom syntax
+      \item Allows for dynamic components
+      \item Automatically triggers re-render
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Local state}
+    \begin{verbatim}
+(defn timer-component []
+  (let [seconds-elapsed (r/atom 0)]
+    (fn []
+      (js/setTimeout #(swap! seconds-elapsed inc)
+       1000)
+      [:div
+       "Seconds Elapsed: " @seconds-elapsed])))
+    \end{verbatim}
+    \begin{itemize}
+      \item Only initializes when neede
+      \item Isolated to the component
+      \item Can share as needed
+      \item Tight re-draw loop
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Sharing state}
+    \begin{verbatim}
+(defn atom-input [value]
+  [:input {:type "text"
+           :value @value
+           :on-change #(reset! value
+                        (-> % .-target
+                            .-value))}])
+
+(defn shared-state []
+  (let [val (r/atom "foo")]
+    (fn []
+      [:div
+       [:p "The value is now: " @val]
+       [:p "Change it here: " [atom-input val]]])))
+    \end{verbatim}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Leaky React}
+    \begin{verbatim}
+(defn list [items]
+  [:ul
+    (for [item items]
+      ^{:key item}
+      [:li "Item " name])])
+    \end{verbatim}
+    \begin{itemize}
+      \item Use Hiccup
+      \item Allows modularizing with components
+      \item Work just like function
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Passing arguments gotcha}
+    \begin{verbatim}
+(defn timer-component [event]
+  (let [seconds-elapsed (r/atom 0)]
+    (fn [event]
+      (js/setTimeout #(swap! seconds-elapsed inc)
+                     1000)
+      [:div
+       "Seconds Elapsed since "
+       event ": "
+       @seconds-elapsed])))
+    \end{verbatim}
+    \begin{itemize}
+      \item Required in both functions
+      \item Breaks initial render if missing at top level
+      \item Breaks subsequent renders if missing in return
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Lazy isn't always good}
+    \begin{verbatim}
+(defn list []
+  [:ul
+    (doall
+      (for [i (range 1 4)]
+        [:li i]))])
+    \end{verbatim}
+    \begin{itemize}
+      \item Forces update
+      \item Can cause intermittent bugs
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Why re-frame?}
+    \begin{itemize}
+      \item Data oriented
+      \item State sharing
+      \item Less decisions
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{The six domains}
+    \begin{itemize}
+      \item Event dispatch
+      \item Event handling
+      \item Effect handling
+      \item Query
+      \item View
+      \item DOM
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Mental Model}
+    \begin{itemize}
+      \item Events trigger \code{dispatchers}
+      \item Dispatch handlers produce effect maps
+      \item Effects modify db and external resources
+      \item \code{subscribers} listen to changes on the db
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Events}
+    \begin{itemize}
+      \item User interactions
+      \item Other events
+      \item Time
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Dispatching}
+    \begin{verbatim}
+(defn delete-button [item-id]
+ [:button
+  {:on-click #(re-frame.core/dispatch
+               [:delete-item item-id])}])
+    \end{verbatim}
+    \begin{itemize}
+      \item Just a function
+      \item Can take extra parameters
+      \item Every dispatch type must have a handler
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Handling a Dispatch}
+    \begin{verbatim}
+(defn delete-item
+  [{:keys [db]} [_ item_id]]
+  {:db (dissoc-in db [:items item-id])})
+
+(rf/reg-event-fx
+ :delete-item
+ delete-item)
+    \end{verbatim}
+    \begin{itemize}
+      \item Always return effect maps
+      \item Effects get automatically triggered
+      \item Only effects can modify state
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Effect handlers}
+    \begin{verbatim}
+(rf/reg-fx
+ :db
+ (fn [val]
+  (reset! app-db val)))
+    \end{verbatim}
+    \begin{itemize}
+      \item Performs some side effect
+      \item Libraries can provide effects
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Why?}
+    \begin{itemize}
+      \item Easy testing
+      \item Single point of control
+      \item Force separation of concerns
+      \item Your own DSL
     \end{itemize}
   \end{frame}
 
