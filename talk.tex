@@ -324,4 +324,109 @@
     \end{itemize}
   \end{frame}
 
+  \begin{frame}[fragile]
+    \frametitle{Creating subscribers}
+    \begin{verbatim}
+(defn query-fn
+  [db v]
+  (:items db))
+
+(rf/reg-sub
+  :query-items
+  query-fn)
+    \end{verbatim}
+    \begin{itemize}
+      \item Works like a view over the db
+      \item Can combine or modify data
+      \item Allows the subscriber to get called from anywhere
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Using subscribers}
+    \begin{verbatim}
+(defn items-view
+  []
+  (let [items @(rf/subscribe [:query-items])]
+    [:div (map item-render items)]))
+    \end{verbatim}
+    \begin{itemize}
+      \item Component automatically updates with subscriber
+      \item Subscribers can take arguments
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Subscribers that subscribe}
+    \begin{verbatim}
+(defn get-item-fn
+  [items [_ id]]
+  (get items id))
+
+(rf/reg-sub
+  :get-item
+  :<- [:items]
+  query-fn)
+    \end{verbatim}
+    \begin{itemize}
+      \item Automatically update when underlying subscribers change
+      \item Allows incrementally computing computations
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Coeffects}
+    \begin{verbatim}
+(rf/reg-cofx
+  :now
+  (fn [coeffects _]
+     (assoc coeffects :now (js.Date.))))
+
+(rf/reg-event-fx
+  :dont-care
+  [(inject-cofx :now)]
+  (fn [{:keys [db now]}]
+    ...))
+    \end{verbatim}
+    \begin{itemize}
+      \item Allows getting things from the outside re-frame
+      \item Keeps re-frame functions pure
+      \item easy testing
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Make testing easier}
+    \begin{verbatim}
+(defmacro reg-sub [id & args]
+  `(do
+     (def ~(-> id name symbol) ~(last args))
+     (rf/reg-sub
+      ~id
+      ~@args)))
+    \end{verbatim}
+    \begin{itemize}
+      \item Automatically creates a function for testing
+      \item Keeps function and registration together
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Always namespace}
+    \begin{itemize}
+      \item Create with \code{::event}
+      \item Reference through named import \code{:my/event}
+      \item Clean organization, easy navigation
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Database recommendations}
+    \begin{itemize}
+      \item Keep things in maps by unique id
+      \item Transform as needed in subscribers
+      \item Do not copy whole objects, use the ids
+    \end{itemize}
+  \end{frame}
+
 \end{document}
